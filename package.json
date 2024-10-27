@@ -1,0 +1,21 @@
+{
+  "name": "splatoon-bot-wechat",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "NXAPI_ZNCA_API=imink npx tsx index.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "nxapi": "^1.6.1",
+    "wechaty": "^1.20.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2"
+  }
+}
