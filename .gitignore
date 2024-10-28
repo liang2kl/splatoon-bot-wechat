@@ -1,6 +1,7 @@
 coral_auth_data.json
 splatnet3_auth_data.json
 *.memory-card.json
+data/
 
 # Logs
 logs

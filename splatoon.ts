@@ -18,9 +18,8 @@ const buildCoopDescription = (detail: CoopHistoryDetail) => {
 const buildIndividualStats = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
     const resultDesc = (result: typeof detail.myResult | typeof detail.memberResults[number]) => {
         let desc = showNameInStats ? `${result.player.name}\n` : "";
-        desc += `🌕 ${result.goldenDeliverCount} (${result.goldenAssistCount})`
-            + `    🟠 ${result.deliverCount}`;
-        desc += `\n🚑 ${result.rescueCount}` + `    💀 ${result.rescuedCount}`;
+        desc += `🟠🌕 ${result.deliverCount}  ${result.goldenDeliverCount}(${result.goldenAssistCount})`;
+        desc += `\n🚑💀 ${result.rescueCount}-${result.rescuedCount}`;
         desc += `\n🔪 ${result.defeatEnemyCount}`;
         return desc;
     };
