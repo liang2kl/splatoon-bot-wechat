@@ -16,6 +16,10 @@ npm install
 
 You can use [`nxapi`](https://github.com/samuelthomas2774/nxapi) to get it.
 
+```bash
+nxapi nso auth
+```
+
 **Configure the bot**
 
 Create a `.env` file in the root directory of the project with the following content:
