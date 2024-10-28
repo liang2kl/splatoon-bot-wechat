@@ -8,6 +8,7 @@ import { ErrorResponse } from 'nxapi';
 import { Response } from 'node-fetch';
 import fs from 'fs';
 import { throttle } from './util';
+import { buildCoopSummary } from './splatoon'
 
 const wechaty = WechatyBuilder.build({ name: "splatoon-bot" }); // get a Wechaty instance
 const messageHandler = throttle((message: Message) => handleMessage(message), 20000);
@@ -110,28 +111,7 @@ const handleMessage = async (message) => {
     const resp = await splatnet3.getCoopHistoryLatest();
     const detailResp = await splatnet3.getCoopHistoryDetail(
         resp.data.coopResult.historyGroupsOnlyFirst.nodes[0].historyDetails.nodes[0].id);
-    const detail = detailResp.data.coopHistoryDetail;
-
-    let reply = `${detail.coopStage.name} (${(detail.jobRate ? detail.jobRate : 0) * 100}%)`;
-    const resultDesc = (result: typeof detail.myResult | typeof detail.memberResults[number]) => {
-        // let desc = result.player.name;
-        let desc = "";
-        desc += `\n🌕 ${result.goldenDeliverCount} (${result.goldenAssistCount})`;
-        desc += `\n🟠 ${result.deliverCount}`;
-        desc += `\n🔪 ${result.defeatEnemyCount}`;
-        desc += `\n🚑 ${result.rescueCount}`;
-        desc += `\n💀 ${result.rescuedCount}`;
-        return desc;
-    };
-
-    let descs = [resultDesc(detail.myResult)];
-    detail.memberResults.forEach((result) => {
-        descs.push(resultDesc(result));
-    });
-    descs = descs.sort(() => Math.random() - 0.5);
-
-    reply += `\n\n${descs.join("\n\n")}`;
-
+    const reply = buildCoopSummary(detailResp.data.coopHistoryDetail);
     console.log("Sending message...");
     room.say(reply);
 }
