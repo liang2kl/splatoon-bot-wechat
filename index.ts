@@ -190,7 +190,7 @@ const saveCoopDetails = async (detail: CoopHistoryDetail) => {
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
-    const path = `${dir}/${detail.playedTime}-${detail.coopStage.name}-${detail.id}.json`;
+    const path = `${dir}/${detail.playedTime}-${detail.coopStage.id}-${detail.id.substring(0, 10)}.json`;
     fs.writeFileSync(path, JSON.stringify(detail));
 }
 
