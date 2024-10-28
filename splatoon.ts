@@ -55,4 +55,4 @@ const buildPlayerRankings = (detail: CoopHistoryDetail) => {
     return desc;
 }
 
-export { buildCoopSummary };
+export { buildCoopSummary, CoopHistoryDetail };

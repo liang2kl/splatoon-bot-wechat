@@ -8,7 +8,7 @@ import { ErrorResponse } from 'nxapi';
 import { Response } from 'node-fetch';
 import fs from 'fs';
 import { throttle, log } from './util';
-import { buildCoopSummary } from './splatoon'
+import { buildCoopSummary, CoopHistoryDetail } from './splatoon'
 
 const wechaty = WechatyBuilder.build({ name: "splatoon-bot" }); // get a Wechaty instance
 const queryThrottle = parseInt(process.env.QUERY_THROTTLE ?? "10000");
@@ -159,6 +159,8 @@ const handleCoopResultQuery = async (message: Message) => {
     const reply = buildCoopSummary(
         detailResp.data.coopHistoryDetail,
         process.env.SHOW_PLAYER_NAME?.toLowerCase() == "true");
+    log("Saving data...");
+    saveCoopDetails(detailResp.data.coopHistoryDetail);
     log("Sending message...");
     message.say(reply);
     log("Message sent");
@@ -181,6 +183,15 @@ const handleAdminMessage = async (message: Message) => {
     } else {
         await message.say("Unknown command");
     }
+}
+
+const saveCoopDetails = async (detail: CoopHistoryDetail) => {
+    const dir = process.env.DATA_SAVE_PATH ?? "./data/work";
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+    }
+    const path = `${dir}/${detail.playedTime}-${detail.coopStage.name}-${detail.id}.json`;
+    fs.writeFileSync(path, JSON.stringify(detail));
 }
 
 await initAuth();
