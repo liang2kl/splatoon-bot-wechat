@@ -4,6 +4,8 @@ Wechat bot for querying Splatoon 3 work (Salmon Run) results.
 
 Contributions are welcome! Feel free to open an issue or a pull request if you have any suggestions or improvements.
 
+![](./docs/screenshot.png)
+
 ## Usage
 
 **Install dependencies**
