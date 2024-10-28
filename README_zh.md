@@ -16,7 +16,7 @@ npm install
 
 **获取 NSO session token**
 
-你可以使用 [`nxapi`](https://github.com/samuelthomas2774/nxapi) 获取.
+你可以使用 [`nxapi`](https://github.com/samuelthomas2774/nxapi) 获取。
 
 ```bash
 nxapi nso auth
@@ -60,6 +60,16 @@ SHOW_PLAYER_NAME=true
 
 ```bash
 npm start
+```
+
+也可以用 Docker 运行：
+
+```bash
+docker run -it \
+    -v $(pwd)/.env:/app/.env \
+    -v $(pwd)/data:/app/data \
+    -v $(pwd)/credentials:/app/credentials \
+    liang2kl/splatoon-bot-wechat:latest
 ```
 
 启动后需要扫描二维码登录微信。账户必须通过实名认证并绑定银行卡才能成功登录。

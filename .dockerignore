@@ -3,6 +3,9 @@ splatnet3_auth_data.json
 *.memory-card.json
 data/
 credentials/
+docs/
+.git/
+README*.md
 
 # Logs
 logs

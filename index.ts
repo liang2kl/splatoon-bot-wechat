@@ -10,9 +10,10 @@ import fs from 'fs';
 import { throttle, log } from './util';
 import { buildCoopSummary, CoopHistoryDetail } from './splatoon'
 
-const wechaty = WechatyBuilder.build({ name: "splatoon-bot" }); // get a Wechaty instance
+const wechaty = WechatyBuilder.build({ name: "splatoon-bot" });
 const queryThrottle = parseInt(process.env.QUERY_THROTTLE ?? "10000");
 const queryMessageHandler = throttle((message: Message) => handleCoopResultQuery(message), queryThrottle);
+const credentialsDir = "./credentials";
 
 wechaty
     .on('scan', (qrcode, status) => log(`Scan QR Code to login: ${status}\nhttps://wechaty.js.org/qrcode/${encodeURIComponent(qrcode)}`))
@@ -40,12 +41,12 @@ const initAuth = async () => {
 }
 
 const getCachedCoralAuthData = async (token: string) => {
-    if (!fs.existsSync("coral_auth_data.json")) {
+    if (!fs.existsSync(credentialsDir + "/coral_auth_data.json")) {
         const resp = await CoralApi.createWithSessionToken(token);
         saveCoralAuthData(resp.data);
         return resp;
     }
-    const data = fs.readFileSync("coral_auth_data.json", "utf-8");
+    const data = fs.readFileSync(credentialsDir + "/coral_auth_data.json", "utf-8");
     return {
         nso: CoralApi.createWithSavedToken(JSON.parse(data)),
         data: JSON.parse(data)
@@ -57,7 +58,7 @@ const saveCoralAuthData = (data: CoralAuthData) => {
 }
 
 const getCachedSplatNet3AuthData = async (coral: CoralApi, user: CoralAuthData['user']) => {
-    if (!fs.existsSync("splatnet3_auth_data.json")) {
+    if (!fs.existsSync(credentialsDir + "/splatnet3_auth_data.json")) {
         const resp = await SplatNet3Api.loginWithCoral(coral, user);
         saveSplatNet3AuthData(resp);
         return {
@@ -65,7 +66,7 @@ const getCachedSplatNet3AuthData = async (coral: CoralApi, user: CoralAuthData['
             data: resp
         }
     }
-    const data = fs.readFileSync("splatnet3_auth_data.json", "utf-8");
+    const data = fs.readFileSync(credentialsDir + "/splatnet3_auth_data.json", "utf-8");
     return {
         splatnet: SplatNet3Api.createWithSavedToken(JSON.parse(data)),
         data: JSON.parse(data)
@@ -73,7 +74,7 @@ const getCachedSplatNet3AuthData = async (coral: CoralApi, user: CoralAuthData['
 }
 
 const saveSplatNet3AuthData = (data: SplatNet3AuthData) => {
-    fs.writeFileSync("splatnet3_auth_data.json", JSON.stringify(data));
+    fs.writeFileSync(credentialsDir + "/splatnet3_auth_data.json", JSON.stringify(data));
 }
 
 const onCoralTokenExpired = async (_: CoralErrorResponse, response: Response) => {
