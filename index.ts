@@ -7,14 +7,16 @@ import SplatNet3Api, { SplatNet3AuthData } from 'nxapi/splatnet3';
 import { ErrorResponse } from 'nxapi';
 import { Response } from 'node-fetch';
 import fs from 'fs';
-import { throttle } from './util';
+import { throttle, log } from './util';
 import { buildCoopSummary } from './splatoon'
 
 const wechaty = WechatyBuilder.build({ name: "splatoon-bot" }); // get a Wechaty instance
-const queryMessageHandler = throttle((message: Message) => handleCoopResultQuery(message), 20000);
+const queryThrottle = parseInt(process.env.QUERY_THROTTLE ?? "10000");
+const queryMessageHandler = throttle((message: Message) => handleCoopResultQuery(message), queryThrottle);
+
 wechaty
-    .on('scan', (qrcode, status) => console.log(`Scan QR Code to login: ${status}\nhttps://wechaty.js.org/qrcode/${encodeURIComponent(qrcode)}`))
-    .on('login', user => console.log(`User ${user} logged in`))
+    .on('scan', (qrcode, status) => log(`Scan QR Code to login: ${status}\nhttps://wechaty.js.org/qrcode/${encodeURIComponent(qrcode)}`))
+    .on('login', user => log(`User ${user} logged in`))
     .on('message', message => handleMessage(message));
 
 let coral: CoralApi;
@@ -101,16 +103,37 @@ const onSplatNet3TokenExpired = async (response: Response) => {
 }
 
 const handleMessage = async (message: Message) => {
-    if (message.talker()?.id == process.env.ADMIN_WECHAT_ID && !message.room()) {
+    if (message.self()) {
+        console.info('Message discarded because it is sent by myself')
+        return
+    }
+
+    if (message.age() > 2 * 60) {
+        console.info('Message discarded because its too old (more than 2 minutes)')
+        return
+    }
+
+    log(`Message received from ` +
+        (message.talker() ? message.talker()!.name() + "(" + message.talker()!.handle() + ")" : "Unknown") + " in " +
+        (message.room() ? await message.room()!.topic() + "(" + message.room()!.handle() + ")" : "PM") +
+        `: "${message.text().substr(0, 10)}"` + (message.text().length > 10 ? "..." : "")
+    );
+    if (message.talker()?.name() == process.env.ADMIN_WECHAT_NICKNAME?.trim() && !message.room()) {
         return handleAdminMessage(message);
     }
-    const selfName = message.room()?.memberAll
-    const text = message.text();
-    if (!text.includes("@" + selfName)) return;
     const room = message.room();
     if (!room) return;
-    // const roomIds = process.env.ROOM_IDS?.split(',').filter((id) => id == room.id);
-    // if (roomIds != undefined && roomIds.length == 0) return;
+    const topic = await room.topic();
+    const roomIds = process.env.ROOM_NAMES?.split(',').filter((name) => name.trim() == topic);
+    if (roomIds != undefined && roomIds.length == 0) return;
+
+    const selfName = await message.room()?.alias(wechaty.currentUser) ?? wechaty.currentUser.name();
+    const text = message.text();
+    const command = process.env.QUERY_COMMAND_FORMAT?.replace("{@selfName}", "@" + selfName)
+        ?? `@${selfName}`;
+
+    if (text.trim() != command) return;
+
     queryMessageHandler(message);
 }
 
@@ -120,12 +143,12 @@ const handleCoopResultQuery = async (message: Message) => {
         return;
     }
 
-    console.log("Start fetching data...");
+    log("Start fetching data...");
     const resp = await splatnet3.getCoopHistoryLatest();
     const detailResp = await splatnet3.getCoopHistoryDetail(
         resp.data.coopResult.historyGroupsOnlyFirst.nodes[0].historyDetails.nodes[0].id);
     const reply = buildCoopSummary(detailResp.data.coopHistoryDetail);
-    console.log("Sending message...");
+    log("Sending message...");
     message.say(reply);
 }
 
@@ -135,7 +158,7 @@ const handleAdminMessage = async (message: Message) => {
         return;
     }
     const command = text.split(" ")[1];
-    console.log("Admin command: " + command);
+    log("Admin command: " + command);
 
     if (command == "stop") {
         currently_stopped = true;

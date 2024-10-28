@@ -22,4 +22,8 @@ function throttle<T extends (...args: any[]) => any>(func: T, limit: number): Th
     };
 }
 
-export { throttle };
+function log(object: any) {
+    console.log(`[${new Date().toISOString()}] ${object}`);
+}
+
+export { throttle, log };
