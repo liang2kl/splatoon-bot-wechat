@@ -114,8 +114,8 @@ const handleMessage = async (message: Message) => {
     }
 
     log(`Message received from ` +
-        (message.talker() ? message.talker()!.name() + "(" + message.talker()!.handle() + ")" : "Unknown") + " in " +
-        (message.room() ? await message.room()!.topic() + "(" + message.room()!.handle() + ")" : "PM") +
+        (message.talker() ? message.talker()!.name().toString() : "Unknown") + " in " +
+        (message.room() ? await message.room()!.topic() : "PM") +
         `: "${message.text().substr(0, 10)}"` + (message.text().length > 10 ? "..." : "")
     );
     if (message.talker()?.name() == process.env.ADMIN_WECHAT_NICKNAME?.trim() && !message.room()) {
