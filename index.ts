@@ -123,9 +123,6 @@ const handleMessage = async (message: Message) => {
     }
     const room = message.room();
     if (!room) return;
-    const topic = await room.topic();
-    const roomIds = process.env.ROOM_NAMES?.split(',').filter((name) => name.trim() == topic);
-    if (roomIds != undefined && roomIds.length == 0) return;
 
     const selfName = await message.room()?.alias(wechaty.currentUser) ?? wechaty.currentUser.name();
     const text = message.text();
@@ -133,6 +130,18 @@ const handleMessage = async (message: Message) => {
         ?? `@${selfName}`;
 
     if (text.trim() != command) return;
+
+    const topic = await room.topic();
+    const roomNames = process.env.ROOM_NAMES;
+    if (roomNames) {
+        const isWhitelisted = roomNames.split(',')
+            .filter((name) => name.trim() == topic)
+            .length > 0;
+        if (!isWhitelisted) {
+            log(`Room ${topic} is not whitelisted`);
+            return;
+        }
+    }
 
     queryMessageHandler(message);
 }
