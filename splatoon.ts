@@ -12,7 +12,7 @@ const buildCoopSummary = (detail: CoopHistoryDetail) => {
 };
 
 const buildCoopDescription = (detail: CoopHistoryDetail) => {
-    return `${detail.coopStage.name} (${(detail.jobRate ? detail.jobRate : 0) * 100}%)`;
+    return `${detail.coopStage.name} (${((detail.dangerRate ? detail.dangerRate : 0) * 100).toFixed(0)}%)`;
 }
 
 const buildIndividualStats = (detail: CoopHistoryDetail) => {
@@ -39,7 +39,7 @@ const buildPlayerRankings = (detail: CoopHistoryDetail) => {
     type Result = typeof detail.myResult | typeof detail.memberResults[number];
     const score = (result: Result) => {
         return result.goldenDeliverCount + 0.5 * result.goldenAssistCount + 0.005 * result.deliverCount +
-            result.defeatEnemyCount + 10 * (result.rescueCount - result.rescuedCount);
+            result.defeatEnemyCount + 2 * (result.rescueCount - result.rescuedCount);
     }
 
     let rankings: Array<[Result, number]> = [[detail.myResult, score(detail.myResult)]];
