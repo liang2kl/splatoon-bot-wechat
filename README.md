@@ -46,10 +46,10 @@ QUERY_COMMAND_FORMAT="{@selfName} query"
 npm start
 ```
 
-You will need to scan the QR code to log in to WeChat. Your account must be real-name verified and add a credit/debit card in order to login successfully.
+You will need to scan the QR code to log in to WeChat. Your account must be real-name verified with a credit/debit card in order to login successfully.
 
 **Use the bot**
 
-In any group chat, send whatever you set in `QUERY_COMMAND_FORMAT` to query the latest Salmon Run results. If not set, the default command is `@<bot>`.
+In the designated group chats, send whatever you set in `QUERY_COMMAND_FORMAT` to query the latest Salmon Run results. If not set, the default command is `@<bot>`.
 
 You can stop the bot from responding queries by sending `/splatoon stop` by the admin. You can restart the bot by sending `/splatoon start`.
