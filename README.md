@@ -1,5 +1,7 @@
 # Splatoon WeChat Bot
 
+English | [中文](./README_zh.md)
+
 Wechat bot for querying Splatoon 3 work (Salmon Run) results.
 
 Contributions are welcome! Feel free to open an issue or a pull request if you have any suggestions or improvements.
