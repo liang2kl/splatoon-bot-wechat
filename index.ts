@@ -152,13 +152,16 @@ const handleCoopResultQuery = async (message: Message) => {
         return;
     }
 
-    log("Start fetching data...");
+    log("Fetching data...");
     const resp = await splatnet3.getCoopHistoryLatest();
     const detailResp = await splatnet3.getCoopHistoryDetail(
         resp.data.coopResult.historyGroupsOnlyFirst.nodes[0].historyDetails.nodes[0].id);
-    const reply = buildCoopSummary(detailResp.data.coopHistoryDetail);
+    const reply = buildCoopSummary(
+        detailResp.data.coopHistoryDetail,
+        process.env.SHOW_PLAYER_NAME?.toLowerCase() == "true");
     log("Sending message...");
     message.say(reply);
+    log("Message sent");
 }
 
 const handleAdminMessage = async (message: Message) => {

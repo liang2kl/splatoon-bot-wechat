@@ -22,8 +22,8 @@ function throttle<T extends (...args: any[]) => any>(func: T, limit: number): Th
     };
 }
 
-function log(object: any) {
-    console.log(`[${new Date().toISOString()}]`, object);
+const log = (...args: any[]) => {
+    console.log(`[${new Date().toISOString()}]`, ...args);
 }
 
 export { throttle, log };

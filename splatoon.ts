@@ -3,9 +3,9 @@ import SplatNet3Api from "nxapi/splatnet3";
 // type alias
 type CoopHistoryDetail = Awaited<ReturnType<SplatNet3Api["getCoopHistoryDetail"]>>["data"]["coopHistoryDetail"];
 
-const buildCoopSummary = (detail: CoopHistoryDetail) => {
+const buildCoopSummary = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
     let summary = buildCoopDescription(detail);
-    summary += "\n\n" + buildIndividualStats(detail);
+    summary += "\n\n" + buildIndividualStats(detail, showNameInStats);
     summary += "\n\n----------------\n\n" + buildPlayerRankings(detail);
 
     return summary;
@@ -15,14 +15,13 @@ const buildCoopDescription = (detail: CoopHistoryDetail) => {
     return `${detail.coopStage.name} (${((detail.dangerRate ? detail.dangerRate : 0) * 100).toFixed(0)}%)`;
 }
 
-const buildIndividualStats = (detail: CoopHistoryDetail) => {
+const buildIndividualStats = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
     const resultDesc = (result: typeof detail.myResult | typeof detail.memberResults[number]) => {
-        let desc = "";
-        desc += `🌕 ${result.goldenDeliverCount} (${result.goldenAssistCount})`;
-        desc += `\n🟠 ${result.deliverCount}`;
+        let desc = showNameInStats ? `${result.player.name}\n` : "";
+        desc += `🌕 ${result.goldenDeliverCount} (${result.goldenAssistCount})`
+            + `    🟠 ${result.deliverCount}`;
+        desc += `\n🚑 ${result.rescueCount}` + `    💀 ${result.rescuedCount}`;
         desc += `\n🔪 ${result.defeatEnemyCount}`;
-        desc += `\n🚑 ${result.rescueCount}`;
-        desc += `\n💀 ${result.rescuedCount}`;
         return desc;
     };
 
