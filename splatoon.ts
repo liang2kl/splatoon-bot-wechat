@@ -5,7 +5,8 @@ type CoopHistoryDetail = Awaited<ReturnType<SplatNet3Api["getCoopHistoryDetail"]
 
 const buildCoopSummary = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
     let summary = buildCoopDescription(detail);
-    summary += "\n\n" + buildIndividualStats(detail, showNameInStats);
+    summary += "\n\n" + buildCoopWaveResults(detail);
+    summary += "\n\n----------------\n\n" + buildIndividualStats(detail, showNameInStats);
     summary += "\n\n----------------\n\n" + buildPlayerRankings(detail);
 
     return summary;
@@ -13,6 +14,20 @@ const buildCoopSummary = (detail: CoopHistoryDetail, showNameInStats: boolean) =
 
 const buildCoopDescription = (detail: CoopHistoryDetail) => {
     return `${detail.coopStage.name} (${((detail.dangerRate ? detail.dangerRate : 0) * 100).toFixed(0)}%)`;
+}
+
+const buildCoopWaveResults = (detail: CoopHistoryDetail) => {
+    let desc = "🌊 Wave Results:\n";
+    detail.waveResults.forEach((wave, i) => {
+        // green/red circle emoji
+        const sign = detail.resultWave - 1 == i ? "🔴" : "🟢";
+        desc += `\nWave ${wave.waveNumber} ${sign} ${wave.teamDeliverCount}(${wave.goldenPopCount})/${wave.deliverNorm}`;
+    });
+    if (detail.bossResult) {
+        const sign = detail.bossResult.hasDefeatBoss ? "🔴" : "🟢";
+        desc += `\nWave Extra ${sign}`;
+    }
+    return desc;
 }
 
 const buildIndividualStats = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
