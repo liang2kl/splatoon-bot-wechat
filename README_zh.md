@@ -45,15 +45,6 @@ ROOM_NAMES="room_1,room_2"
 # （可选，默认为 10000）
 QUERY_THROTTLE=10000
 
-# 查询最新打工命令格式
-# 使用 '{@selfName}' 代表 '@机器人昵称'
-# （可选，默认为 '{@selfName}'）
-QUERY_LAST_WORK_COMMAND_FORMAT="{@selfName}"
-
-# 查询打工日历命令格式
-# （可选，默认为 '{@selfName} schedule'）
-QUERY_SCHEDULE_COMMAND_FORMAT="{@selfName} schedule"
-
 # 数据保存目录
 # （可选，默认为 './data/work/'）
 DATA_SAVE_PATH="./data/work/"
@@ -69,6 +60,30 @@ TIMEZONE="Asia/Shanghai"
 # 语言
 # （可选，默认为 NSO 账户设置语言）
 LANGUAGE="zh-CN"
+
+# 分数计算公式
+# （可选，默认为：
+#   {goldDeliver} + 0.5 * {goldAssist}
+#   + 0.005 * {deliver} + {defeatEnemy}
+#   + 2 * ({rescue} - {death})
+#  ）
+# 可以使用以下变量：
+#   {goldDeliver} - 金蛋数量
+#   {goldAssist} - 金蛋助攻数量
+#   {deliver} - 红蛋数量
+#   {defeatEnemy} - 击败敌人数量
+#   {rescue} - 救援次数
+#   {death} - 死亡次数
+SCORING_FUNCTION="..."
+
+# 查询最新打工命令格式
+# 使用 '{@selfName}' 代表 '@机器人昵称'
+# （可选，默认为 '{@selfName}'）
+QUERY_LAST_WORK_COMMAND_FORMAT="{@selfName}"
+
+# 查询打工日历命令格式
+# （可选，默认为 '{@selfName} schedule'）
+QUERY_SCHEDULE_COMMAND_FORMAT="{@selfName} schedule"
 ```
 
 **运行机器人**

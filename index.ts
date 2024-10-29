@@ -187,7 +187,6 @@ const getHandler = async (message: Message) => {
     // Wechat uses special space character for @name
     const messageVal = message.text().trim().replace(" ", " ");
 
-    log(message.text().trim());
     for (const [command, handler] of availableCommands) {
         if (messageVal == command.replace("{@selfName}", "@" + selfName)) {
             return handler;

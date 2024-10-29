@@ -1,4 +1,5 @@
 import SplatNet3Api from "nxapi/splatnet3";
+import * as math from "mathjs";
 
 // type alias
 type CoopHistoryDetail = Awaited<ReturnType<SplatNet3Api["getCoopHistoryDetail"]>>["data"]["coopHistoryDetail"];
@@ -32,7 +33,7 @@ const buildScheduleSummary = (coopSchedules: CoopSchedules) => {
         const startTime = new Date(schedule.startTime).toLocaleString("en-US", timeFormatOptions);
         const endTime = new Date(schedule.endTime).toLocaleString("en-US", timeFormatOptions);
         desc += `\n\n${i + 1}. ${schedule.setting?.coopStage.name}`;
-        desc += `\n${startTime} - ${endTime}`;
+        desc += `\n${startTime} -\n${endTime}`;
         desc += "\n🔫";
         schedule.setting?.weapons.forEach((weapon) => {
             desc += `\n- ${weapon.name}`;
@@ -79,9 +80,24 @@ const buildIndividualStats = (detail: CoopHistoryDetail, showNameInStats: boolea
 
 const buildPlayerRankings = (detail: CoopHistoryDetail) => {
     type Result = typeof detail.myResult | typeof detail.memberResults[number];
-    const score = (result: Result) => {
-        return result.goldenDeliverCount + 0.5 * result.goldenAssistCount + 0.005 * result.deliverCount +
-            result.defeatEnemyCount + 2 * (result.rescueCount - result.rescuedCount);
+    let score: (result: Result) => number;
+    let customScoringFunc = process.env.SCORING_FUNCTION;
+    if (customScoringFunc) {
+        score = (result: Result) => {
+            let expr = customScoringFunc
+                .replace("{goldDeliver}", result.goldenDeliverCount.toString())
+                .replace("{goldAssist}", result.goldenAssistCount.toString())
+                .replace("{deliver}", result.deliverCount.toString())
+                .replace("{rescue}", result.rescueCount.toString())
+                .replace("{death}", result.rescuedCount.toString())
+                .replace("{defeatEnemy}", result.defeatEnemyCount.toString());
+            return math.evaluate(expr);
+        }
+    } else {
+        score = (result: Result) => {
+            return result.goldenDeliverCount + 0.5 * result.goldenAssistCount + 0.005 * result.deliverCount +
+                result.defeatEnemyCount + 2 * (result.rescueCount - result.rescuedCount);
+        }
     }
 
     let rankings: Array<[Result, number]> = [[detail.myResult, score(detail.myResult)]];

@@ -48,15 +48,6 @@ ROOM_NAMES="room_1,room_2"
 # (optional, default is 10000)
 QUERY_THROTTLE=10000
 
-# Query last work's detail command format
-# Use '{@selfName}' to represent '@bot_nickname'
-# (optional, default is '{@selfName}')
-QUERY_LAST_WORK_COMMAND_FORMAT="{@selfName}"
-
-# Query work schedule command format
-# (optional, default is '{@selfName} schedule')
-QUERY_SCHEDULE_COMMAND_FORMAT="{@selfName} schedule"
-
 # Data save directory
 # (optional, default is './data/work/')
 DATA_SAVE_PATH="./data/work/"
@@ -72,6 +63,30 @@ TIMEZONE="America/New_York"
 # Language
 # (optional, default is account language)
 LANGUAGE="zh-CN"
+
+# Scoring function for ranking
+# (optional, default:
+#   {goldDeliver} + 0.5 * {goldAssist}
+#   + 0.005 * {deliver} + {defeatEnemy}
+#   + 2 * ({rescue} - {death})
+# )
+# The following variables can be used:
+#   {goldDeliver} - number of golden eggs delivered
+#   {goldAssist} - number of golden eggs assisted
+#   {deliver} - number of red eggs delivered
+#   {defeatEnemy} - number of enemies defeated
+#   {rescue} - number of players rescued
+#   {death} - number of deaths
+SCORING_FUNCTION="..."
+
+# Query last work's detail command format
+# Use '{@selfName}' to represent '@bot_nickname'
+# (optional, default is '{@selfName}')
+QUERY_LAST_WORK_COMMAND_FORMAT="{@selfName}"
+
+# Query work schedule command format
+# (optional, default is '{@selfName} schedule')
+QUERY_SCHEDULE_COMMAND_FORMAT="{@selfName} schedule"
 ```
 
 **Run the bot**
