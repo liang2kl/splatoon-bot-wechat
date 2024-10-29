@@ -4,12 +4,14 @@ import SplatNet3Api from "nxapi/splatnet3";
 type CoopHistoryDetail = Awaited<ReturnType<SplatNet3Api["getCoopHistoryDetail"]>>["data"]["coopHistoryDetail"];
 
 const buildCoopSummary = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
-    let summary = buildCoopDescription(detail);
-    summary += "\n\n" + buildCoopWaveResults(detail);
-    summary += "\n\n----------------\n\n" + buildIndividualStats(detail, showNameInStats);
-    summary += "\n\n----------------\n\n" + buildPlayerRankings(detail);
+    const desc = buildCoopDescription(detail);
+    const sections = [
+        buildCoopWaveResults(detail),
+        buildIndividualStats(detail, showNameInStats),
+        buildPlayerRankings(detail),
+    ]
 
-    return summary;
+    return desc + "\n\n" + sections.join("\n\n----------------\n\n");
 };
 
 const buildCoopDescription = (detail: CoopHistoryDetail) => {
@@ -19,14 +21,14 @@ const buildCoopDescription = (detail: CoopHistoryDetail) => {
 const buildCoopWaveResults = (detail: CoopHistoryDetail) => {
     let desc = "🌊 Wave Results:\n";
     detail.waveResults.forEach((wave, i) => {
-        // green/red circle emoji
         const sign = detail.resultWave - 1 == i ? "🔴" : "🟢";
-        desc += `\nWave ${wave.waveNumber} ${sign} ${wave.teamDeliverCount}(${wave.goldenPopCount})/${wave.deliverNorm}`;
+        desc += `\n${sign} ${wave.teamDeliverCount} / ${wave.deliverNorm} (${wave.goldenPopCount}) `;
+        desc += "\u258A".repeat(wave.waterLevel + 1);
     });
-    if (detail.bossResult) {
-        const sign = detail.bossResult.hasDefeatBoss ? "🔴" : "🟢";
-        desc += `\nWave Extra ${sign}`;
-    }
+    // if (detail.bossResult) {
+    //     const sign = detail.bossResult.hasDefeatBoss ? "🔴" : "🟢";
+    //     desc += `\n${sign} EX Wave`;
+    // }
     return desc;
 }
 
