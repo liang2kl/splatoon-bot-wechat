@@ -88,9 +88,16 @@ docker run -it \
 
 **使用机器人**
 
-在指定的群聊中：
+在指定的群聊中，使用你在 `.env` 中设置的命令或使用默认命令与机器人进行交互，其中 `@bot_nickname` 为机器人在群中的昵称。
 
-- 发送你在 `QUERY_LAST_WORK_COMMAND_FORMAT` 中设置的内容来查询最新的打工结果。如果没有设置，默认命令是 `@your_bot_nickname`。
-- 发送你在 `QUERY_SCHEDULE_COMMAND_FORMAT` 中设置的内容来查询打工日历。如果没有设置，默认命令是 `@your_bot_nickname schedule`。
+| 命令 | 默认值 | 描述 |
+| --- | --- | --- |
+| `QUERY_LAST_WORK_COMMAND_FORMAT` | `@bot_nickname` | 查询最新的打工结果 |
+| `QUERY_SCHEDULE_COMMAND_FORMAT` | `@bot_nickname schedule` | 查询打工日历 |
 
-管理员可以通过发送 `/splatoon stop` 来停止机器人，发送 `/splatoon start` 来重新启动机器人。
+你可以通过使用管理员微信账户发送以下命令来控制机器人：
+
+| 命令 | 描述 |
+| --- | --- |
+| `/splatoon stop` | 停止机器人响应查询 |
+| `/splatoon start` | 重新启动机器人 |

@@ -46,7 +46,7 @@ ROOM_NAMES="room_1,room_2"
 QUERY_THROTTLE=10000
 
 # Query last work's detail command format
-# Use '{@selfName}' to represent '@your_bot_nickname'
+# Use '{@selfName}' to represent '@bot_nickname'
 # (optional, default is '{@selfName}')
 QUERY_LAST_WORK_COMMAND_FORMAT="{@selfName}"
 
@@ -91,9 +91,16 @@ You will need to scan the QR code to log in to WeChat. Your account must be real
 
 **Use the bot**
 
-In the designated group chats,
+In the designated group chats, use the commands you set in your enviroment or use the default commands to interact with the bot. `@bot_nickname` is the nickname of the bot in the group chat.
 
-- send whatever you set in `QUERY_LAST_WORK_COMMAND_FORMAT` to query the latest Salmon Run results. If not set, the default command is `@your_bot_nickname`.
-- send whatever you set in `QUERY_SCHEDULE_COMMAND_FORMAT` to query the upcoming Salmon Run schedule. If not set, the default command is `@your_bot_nickname schedule`.
+| Command | Default | Description |
+| --- | --- | --- |
+| `QUERY_LAST_WORK_COMMAND_FORMAT` | `@bot_nickname` | Query the latest Salmon Run results |
+| `QUERY_SCHEDULE_COMMAND_FORMAT` | `@bot_nickname schedule` | Query the upcoming Salmon Run schedule |
 
-You can stop the bot from responding to queries by sending `/splatoon stop` by the admin. You can restart the bot by sending `/splatoon start`.
+You can control the bot by sending the following commands using the admin WeChat account:
+
+| Command | Description |
+| --- | --- |
+| `/splatoon stop` | Stop the bot from responding to queries |
+| `/splatoon start` | Resume the bot |
