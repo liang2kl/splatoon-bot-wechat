@@ -54,7 +54,7 @@ const getCachedCoralAuthData = async (token: string) => {
 }
 
 const saveCoralAuthData = (data: CoralAuthData) => {
-    fs.writeFileSync("coral_auth_data.json", JSON.stringify(data));
+    fs.writeFileSync(credentialsDir + "/coral_auth_data.json", JSON.stringify(data));
 }
 
 const getCachedSplatNet3AuthData = async (coral: CoralApi, user: CoralAuthData['user']) => {
