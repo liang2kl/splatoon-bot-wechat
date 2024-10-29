@@ -184,9 +184,12 @@ const getHandler = async (message: Message) => {
         [process.env.QUERY_SCHEDULE_COMMAND_FORMAT ?? "{@selfName} schedule", handleScheduleQuery],
     ]
     const selfName = await message.room()?.alias(wechaty.currentUser) ?? wechaty.currentUser.name();
+    // Wechat uses special space character for @name
+    const messageVal = message.text().trim().replace(" ", " ");
 
+    log(message.text().trim());
     for (const [command, handler] of availableCommands) {
-        if (message.text().trim() == command.replace("{@selfName}", "@" + selfName)) {
+        if (messageVal == command.replace("{@selfName}", "@" + selfName)) {
             return handler;
         }
     }
