@@ -23,6 +23,7 @@ const buildScheduleSummary = (coopSchedules: CoopSchedules) => {
         ...coopSchedules.bigRunSchedules.nodes,
         ...coopSchedules.regularSchedules.nodes,
     ];
+    combinedSchedules.sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
 
     let desc = "📅 Coop Schedules:";
     const timeZone = process.env.TIMEZONE ?? "Asia/Shanghai";
@@ -32,7 +33,7 @@ const buildScheduleSummary = (coopSchedules: CoopSchedules) => {
         const endTime = new Date(schedule.endTime).toLocaleString("en-US", timeFormatOptions);
         desc += `\n\n${i + 1}. ${schedule.setting?.coopStage.name}`;
         desc += `\n${startTime} - ${endTime}`;
-        desc += "\n🔫 Weapons:";
+        desc += "\n🔫";
         schedule.setting?.weapons.forEach((weapon) => {
             desc += `\n- ${weapon.name}`;
         });
@@ -47,7 +48,7 @@ const buildCoopDescription = (detail: CoopHistoryDetail) => {
 const buildCoopWaveResults = (detail: CoopHistoryDetail) => {
     let desc = "🌊 Wave Results:\n";
     detail.waveResults.forEach((wave, i) => {
-        const sign = detail.resultWave - 1 == i ? "🔴" : "🟢";
+        const sign = detail.resultWave - 1 == i || (i == 3 && !detail.bossResult?.hasDefeatBoss) ? "🔴" : "🟢";
         desc += `\n${sign} ${wave.teamDeliverCount} / ${wave.deliverNorm} (${wave.goldenPopCount}) `;
         desc += "\u258A".repeat(wave.waterLevel + 1);
     });
