@@ -125,12 +125,12 @@ const makeDirIfNotExist = (dir: string) => {
 
 const handleMessage = async (message: Message) => {
     if (message.self()) {
-        console.info('Message discarded because it is sent by myself')
+        log('Message discarded because it is sent by myself')
         return
     }
 
     if (message.age() > 2 * 60) {
-        console.info('Message discarded because its too old (more than 2 minutes)')
+        log('Message discarded because its too old (more than 2 minutes)')
         return
     }
 
@@ -143,10 +143,16 @@ const handleMessage = async (message: Message) => {
         return handleAdminMessage(message);
     }
     const room = message.room();
-    if (!room) return;
+    if (!room) {
+        log("Message discarded because it is not in a room");
+        return;
+    }
 
     const handler = await getHandler(message);
-    if (!handler) return;
+    if (!handler) {
+        log("No handler found for the message");
+        return;
+    }
 
     const topic = await room.topic();
     const roomNames = process.env.ROOM_NAMES;
@@ -176,7 +182,7 @@ const getHandler = async (message: Message) => {
     const selfName = await message.room()?.alias(wechaty.currentUser) ?? wechaty.currentUser.name();
 
     for (const [command, handler] of availableCommands) {
-        if (message.text() == command.replace("{@selfName}", "@" + selfName)) {
+        if (message.text().trim() == command.replace("{@selfName}", "@" + selfName)) {
             return handler;
         }
     }
