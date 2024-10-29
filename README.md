@@ -21,8 +21,11 @@ npm install
 You can use [`nxapi`](https://github.com/samuelthomas2774/nxapi) to get it.
 
 ```bash
+npm install -g nxapi
 nxapi nso auth
 ```
+
+Follow the instructions to log in to your NSO account and obtain the session token.
 
 **Configure the bot**
 

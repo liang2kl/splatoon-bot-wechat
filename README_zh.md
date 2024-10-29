@@ -19,8 +19,11 @@ npm install
 你可以使用 [`nxapi`](https://github.com/samuelthomas2774/nxapi) 获取。
 
 ```bash
+npm install -g nxapi
 nxapi nso auth
 ```
+
+根据提示获取 session token。
 
 **配置 bot**
 
