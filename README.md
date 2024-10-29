@@ -45,10 +45,14 @@ ROOM_NAMES="room_1,room_2"
 # (optional, default is 10000)
 QUERY_THROTTLE=10000
 
-# Query command format
+# Query last work's detail command format
 # Use '{@selfName}' to represent '@your_bot_nickname'
 # (optional, default is '{@selfName}')
-QUERY_COMMAND_FORMAT="{@selfName} query"
+QUERY_LAST_WORK_COMMAND_FORMAT="{@selfName}"
+
+# Query work schedule command format
+# (optional, default is '{@selfName} schedule')
+QUERY_SCHEDULE_COMMAND_FORMAT="{@selfName} schedule"
 
 # Data save directory
 # (optional, default is './data/work/')
@@ -57,6 +61,14 @@ DATA_SAVE_PATH="./data/work/"
 # Show the username of the player in statistics
 # (optional, default is false)
 SHOW_PLAYER_NAME=true
+
+# Timezone
+# (optional, default is 'Asia/Shanghai')
+TIMEZONE="America/New_York"
+
+# Language
+# (optional, default is account language)
+LANGUAGE="zh-CN"
 ```
 
 **Run the bot**
@@ -79,6 +91,9 @@ You will need to scan the QR code to log in to WeChat. Your account must be real
 
 **Use the bot**
 
-In the designated group chats, send whatever you set in `QUERY_COMMAND_FORMAT` to query the latest Salmon Run results. If not set, the default command is `@your_bot_nickname`.
+In the designated group chats,
+
+- send whatever you set in `QUERY_LAST_WORK_COMMAND_FORMAT` to query the latest Salmon Run results. If not set, the default command is `@your_bot_nickname`.
+- send whatever you set in `QUERY_SCHEDULE_COMMAND_FORMAT` to query the upcoming Salmon Run schedule. If not set, the default command is `@your_bot_nickname schedule`.
 
 You can stop the bot from responding to queries by sending `/splatoon stop` by the admin. You can restart the bot by sending `/splatoon start`.

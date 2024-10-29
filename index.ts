@@ -8,11 +8,12 @@ import { ErrorResponse } from 'nxapi';
 import { Response } from 'node-fetch';
 import fs from 'fs';
 import { throttle, log } from './util';
-import { buildCoopSummary, CoopHistoryDetail } from './splatoon'
+import { buildCoopSummary, buildScheduleSummary, CoopHistoryDetail } from './splatoon'
 
 const wechaty = WechatyBuilder.build({ name: "splatoon-bot" });
 const queryThrottle = parseInt(process.env.QUERY_THROTTLE ?? "10000");
-const queryMessageHandler = throttle((message: Message) => handleCoopResultQuery(message), queryThrottle);
+const throttledQueryHandler = throttle(
+    (handler: (_: Message) => void, message: Message) => handleQuery(handler, message), queryThrottle);
 const credentialsDir = "./credentials";
 
 wechaty
@@ -41,8 +42,10 @@ const initAuth = async () => {
 }
 
 const getCachedCoralAuthData = async (token: string) => {
+    makeDirIfNotExist(credentialsDir);
     if (!fs.existsSync(credentialsDir + "/coral_auth_data.json")) {
         const resp = await CoralApi.createWithSessionToken(token);
+        updateLangCode(resp.data);
         saveCoralAuthData(resp.data);
         return resp;
     }
@@ -54,6 +57,7 @@ const getCachedCoralAuthData = async (token: string) => {
 }
 
 const saveCoralAuthData = (data: CoralAuthData) => {
+    makeDirIfNotExist(credentialsDir);
     fs.writeFileSync(credentialsDir + "/coral_auth_data.json", JSON.stringify(data));
 }
 
@@ -74,6 +78,7 @@ const getCachedSplatNet3AuthData = async (coral: CoralApi, user: CoralAuthData['
 }
 
 const saveSplatNet3AuthData = (data: SplatNet3AuthData) => {
+    makeDirIfNotExist(credentialsDir);
     fs.writeFileSync(credentialsDir + "/splatnet3_auth_data.json", JSON.stringify(data));
 }
 
@@ -81,6 +86,7 @@ const onCoralTokenExpired = async (_: CoralErrorResponse, response: Response) =>
     const data = await CoralApi.createWithSessionToken(process.env.NT_SESSION_TOKEN!);
     coral = data.nso;
     coral_auth_data = data.data;
+    updateLangCode(data.data);
     saveCoralAuthData(data.data);
     return data.data;
 }
@@ -101,6 +107,20 @@ const onSplatNet3TokenExpired = async (response: Response) => {
         throw err;
     }
 
+}
+
+const updateLangCode = async (data: typeof coral_auth_data) => {
+    const code = process.env.LANG_CODE;
+    if (!code) return;
+    data.user.language = code;
+};
+
+const makeDirIfNotExist = (dir: string) => {
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+        return true;
+    }
+    return false;
 }
 
 const handleMessage = async (message: Message) => {
@@ -125,12 +145,8 @@ const handleMessage = async (message: Message) => {
     const room = message.room();
     if (!room) return;
 
-    const selfName = await message.room()?.alias(wechaty.currentUser) ?? wechaty.currentUser.name();
-    const text = message.text();
-    const command = process.env.QUERY_COMMAND_FORMAT?.replace("{@selfName}", "@" + selfName)
-        ?? `@${selfName}`;
-
-    if (text.trim() != command) return;
+    const handler = await getHandler(message);
+    if (!handler) return;
 
     const topic = await room.topic();
     const roomNames = process.env.ROOM_NAMES;
@@ -144,27 +160,52 @@ const handleMessage = async (message: Message) => {
         }
     }
 
-    queryMessageHandler(message);
-}
-
-const handleCoopResultQuery = async (message: Message) => {
     if (currently_stopped) {
         message.say("I'm currently stopped. Please wait for the admin to start me.");
         return;
     }
 
-    log("Fetching data...");
+    return throttledQueryHandler(handler, message);
+}
+
+const getHandler = async (message: Message) => {
+    const availableCommands: Array<[string, (_: Message) => void]> = [
+        [process.env.QUERY_LAST_WORK_COMMAND_FORMAT ?? "{@selfName}", handleCoopResultQuery],
+        [process.env.QUERY_SCHEDULE_COMMAND_FORMAT ?? "@{selfName} schedule", handleScheduleQuery],
+    ]
+    const selfName = await message.room()?.alias(wechaty.currentUser) ?? wechaty.currentUser.name();
+
+    for (const [command, handler] of availableCommands) {
+        if (message.text() == command.replace("{@selfName}", "@" + selfName)) {
+            return handler;
+        }
+    }
+}
+
+const handleQuery = async (handler: (_: Message) => void, message: Message) => {
+    handler(message);
+}
+
+const handleCoopResultQuery = async (message: Message) => {
+    log("Handling coop result query");
     const resp = await splatnet3.getCoopHistoryLatest();
     const detailResp = await splatnet3.getCoopHistoryDetail(
         resp.data.coopResult.historyGroupsOnlyFirst.nodes[0].historyDetails.nodes[0].id);
     const reply = buildCoopSummary(
         detailResp.data.coopHistoryDetail,
         process.env.SHOW_PLAYER_NAME?.toLowerCase() == "true");
-    log("Saving data...");
     saveCoopDetails(detailResp.data.coopHistoryDetail);
-    log("Sending message...");
     message.say(reply);
-    log("Message sent");
+    log("Coop result query done");
+}
+
+const handleScheduleQuery = async (message: Message) => {
+    log("Handling schedule query");
+    const resp = await splatnet3.getSchedules();
+    const schedules = resp.data.coopGroupingSchedule;
+    const reply = buildScheduleSummary(schedules);
+    message.say(reply);
+    log("Schedule query done");
 }
 
 const handleAdminMessage = async (message: Message) => {

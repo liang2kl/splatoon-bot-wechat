@@ -2,6 +2,7 @@ import SplatNet3Api from "nxapi/splatnet3";
 
 // type alias
 type CoopHistoryDetail = Awaited<ReturnType<SplatNet3Api["getCoopHistoryDetail"]>>["data"]["coopHistoryDetail"];
+type CoopSchedules = Awaited<ReturnType<SplatNet3Api["getSchedules"]>>["data"]["coopGroupingSchedule"];
 
 const buildCoopSummary = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
     const desc = buildCoopDescription(detail);
@@ -13,6 +14,31 @@ const buildCoopSummary = (detail: CoopHistoryDetail, showNameInStats: boolean) =
 
     return desc + "\n\n" + sections.join("\n\n----------------\n\n");
 };
+
+const buildScheduleSummary = (coopSchedules: CoopSchedules) => {
+    type ScheduleDetail = typeof coopSchedules.bigRunSchedules.nodes[number] |
+        typeof coopSchedules.regularSchedules.nodes[number];
+
+    const combinedSchedules: Array<ScheduleDetail> = [
+        ...coopSchedules.bigRunSchedules.nodes,
+        ...coopSchedules.regularSchedules.nodes,
+    ];
+
+    let desc = "📅 Coop Schedules:";
+    const timeZone = process.env.TIMEZONE ?? "Asia/Shanghai";
+    const timeFormatOptions: Intl.DateTimeFormatOptions = { timeZone, timeStyle: "short", dateStyle: "short" };
+    combinedSchedules.forEach((schedule, i) => {
+        const startTime = new Date(schedule.startTime).toLocaleString("en-US", timeFormatOptions);
+        const endTime = new Date(schedule.endTime).toLocaleString("en-US", timeFormatOptions);
+        desc += `\n\n${i + 1}. ${schedule.setting?.coopStage.name}`;
+        desc += `\n${startTime} - ${endTime}`;
+        desc += "\n🔫 Weapons:";
+        schedule.setting?.weapons.forEach((weapon) => {
+            desc += `\n- ${weapon.name}`;
+        });
+    });
+    return desc;
+}
 
 const buildCoopDescription = (detail: CoopHistoryDetail) => {
     return `${detail.coopStage.name} (${((detail.dangerRate ? detail.dangerRate : 0) * 100).toFixed(0)}%)`;
@@ -71,4 +97,4 @@ const buildPlayerRankings = (detail: CoopHistoryDetail) => {
     return desc;
 }
 
-export { buildCoopSummary, CoopHistoryDetail };
+export { buildCoopSummary, buildScheduleSummary, CoopHistoryDetail };

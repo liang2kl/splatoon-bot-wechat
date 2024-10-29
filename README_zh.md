@@ -42,10 +42,14 @@ ROOM_NAMES="room_1,room_2"
 # （可选，默认为 10000）
 QUERY_THROTTLE=10000
 
-# 查询命令格式
+# 查询最新打工命令格式
 # 使用 '{@selfName}' 代表 '@机器人昵称'
 # （可选，默认为 '{@selfName}'）
-QUERY_COMMAND_FORMAT="{@selfName} query"
+QUERY_LAST_WORK_COMMAND_FORMAT="{@selfName}"
+
+# 查询打工日历命令格式
+# （可选，默认为 '{@selfName} schedule'）
+QUERY_SCHEDULE_COMMAND_FORMAT="{@selfName} schedule"
 
 # 数据保存目录
 # （可选，默认为 './data/work/'）
@@ -54,6 +58,14 @@ DATA_SAVE_PATH="./data/work/"
 # 是否在统计中显示玩家名称
 # （可选，默认为 false）
 SHOW_PLAYER_NAME=true
+
+# 时区
+# （可选，默认为 'Asia/Shanghai'）
+TIMEZONE="Asia/Shanghai"
+
+# 语言
+# （可选，默认为 NSO 账户设置语言）
+LANGUAGE="zh-CN"
 ```
 
 **运行机器人**
@@ -76,6 +88,9 @@ docker run -it \
 
 **使用机器人**
 
-在指定的群聊中，发送你在 `QUERY_COMMAND_FORMAT` 中设置的内容来查询最新的打工结果。如果没有设置，默认命令是 `@your_bot_nickname`。
+在指定的群聊中：
+
+- 发送你在 `QUERY_LAST_WORK_COMMAND_FORMAT` 中设置的内容来查询最新的打工结果。如果没有设置，默认命令是 `@your_bot_nickname`。
+- 发送你在 `QUERY_SCHEDULE_COMMAND_FORMAT` 中设置的内容来查询打工日历。如果没有设置，默认命令是 `@your_bot_nickname schedule`。
 
 管理员可以通过发送 `/splatoon stop` 来停止机器人，发送 `/splatoon start` 来重新启动机器人。
