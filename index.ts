@@ -171,13 +171,17 @@ const handleMessage = async (message: Message) => {
         return;
     }
 
-    return throttledQueryHandler(handler, message);
+    let executed = throttledQueryHandler(handler, message);
+    if (!executed) {
+        log("Query not executed due to throttling");
+        message.say("Please wait a moment before querying again.");
+    }
 }
 
 const getHandler = async (message: Message) => {
     const availableCommands: Array<[string, (_: Message) => void]> = [
         [process.env.QUERY_LAST_WORK_COMMAND_FORMAT ?? "{@selfName}", handleCoopResultQuery],
-        [process.env.QUERY_SCHEDULE_COMMAND_FORMAT ?? "@{selfName} schedule", handleScheduleQuery],
+        [process.env.QUERY_SCHEDULE_COMMAND_FORMAT ?? "{@selfName} schedule", handleScheduleQuery],
     ]
     const selfName = await message.room()?.alias(wechaty.currentUser) ?? wechaty.currentUser.name();
 
