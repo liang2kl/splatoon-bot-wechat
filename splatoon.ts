@@ -5,11 +5,11 @@ import * as math from "mathjs";
 type CoopHistoryDetail = Awaited<ReturnType<SplatNet3Api["getCoopHistoryDetail"]>>["data"]["coopHistoryDetail"];
 type CoopSchedules = Awaited<ReturnType<SplatNet3Api["getSchedules"]>>["data"]["coopGroupingSchedule"];
 
-const buildCoopSummary = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
+const buildCoopSummary = (detail: CoopHistoryDetail) => {
     const desc = buildCoopDescription(detail);
     const sections = [
         buildCoopWaveResults(detail),
-        buildIndividualStats(detail, showNameInStats),
+        buildIndividualStats(detail),
         buildPlayerRankings(detail),
     ]
 
@@ -17,12 +17,15 @@ const buildCoopSummary = (detail: CoopHistoryDetail, showNameInStats: boolean) =
 };
 
 const buildScheduleSummary = (coopSchedules: CoopSchedules) => {
-    type ScheduleDetail = typeof coopSchedules.bigRunSchedules.nodes[number] |
-        typeof coopSchedules.regularSchedules.nodes[number];
+    type ScheduleDetail =
+        | (typeof coopSchedules.bigRunSchedules.nodes)[number]
+        | (typeof coopSchedules.regularSchedules.nodes)[number]
+        | (typeof coopSchedules.teamContestSchedules.nodes)[number];
 
     const combinedSchedules: Array<ScheduleDetail> = [
         ...coopSchedules.bigRunSchedules.nodes,
         ...coopSchedules.regularSchedules.nodes,
+        ...coopSchedules.teamContestSchedules.nodes,
     ];
     combinedSchedules.sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
 
@@ -49,8 +52,13 @@ const buildCoopDescription = (detail: CoopHistoryDetail) => {
 const buildCoopWaveResults = (detail: CoopHistoryDetail) => {
     let desc = "🌊 Wave Results:\n";
     detail.waveResults.forEach((wave, i) => {
-        const sign = detail.resultWave - 1 == i || (i == 3 && !detail.bossResult?.hasDefeatBoss) ? "🔴" : "🟢";
-        desc += `\n${sign} ${wave.teamDeliverCount} / ${wave.deliverNorm} (${wave.goldenPopCount}) `;
+        const isExWave = i == 3;
+        const sign = detail.resultWave - 1 == i || (isExWave && !detail.bossResult?.hasDefeatBoss) ? "🔴" : "🟢";
+        if (!isExWave) {
+            desc += `\n${sign} ${wave.teamDeliverCount} / ${wave.deliverNorm} (${wave.goldenPopCount}) `;
+        } else {
+            desc += `\n${sign} ${detail.bossResult?.boss?.name} (${wave.goldenPopCount}) `;
+        }
         desc += "\u258A".repeat(wave.waterLevel + 1);
     });
     // if (detail.bossResult) {
@@ -60,7 +68,9 @@ const buildCoopWaveResults = (detail: CoopHistoryDetail) => {
     return desc;
 }
 
-const buildIndividualStats = (detail: CoopHistoryDetail, showNameInStats: boolean) => {
+const buildIndividualStats = (detail: CoopHistoryDetail) => {
+    const showNameInStats =
+        process.env.SHOW_PLAYER_NAME?.toLowerCase() == "true";
     const resultDesc = (result: typeof detail.myResult | typeof detail.memberResults[number]) => {
         let desc = showNameInStats ? `${result.player.name}\n` : "";
         desc += `🟠🌕 ${result.deliverCount}  ${result.goldenDeliverCount}(${result.goldenAssistCount})`;

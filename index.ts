@@ -82,7 +82,7 @@ const saveSplatNet3AuthData = (data: SplatNet3AuthData) => {
     fs.writeFileSync(credentialsDir + "/splatnet3_auth_data.json", JSON.stringify(data));
 }
 
-const onCoralTokenExpired = async (_: CoralErrorResponse, response: Response) => {
+const onCoralTokenExpired = async (error: any, response: any) => {
     const data = await CoralApi.createWithSessionToken(process.env.NT_SESSION_TOKEN!);
     coral = data.nso;
     coral_auth_data = data.data;
@@ -99,6 +99,7 @@ const onSplatNet3TokenExpired = async (response: Response) => {
         return data;
     } catch (err) {
         if (err instanceof ErrorResponse && err.response.status === 401) {
+            onCoralTokenExpired(null, null);
             const data = await SplatNet3Api.loginWithCoral(coral, coral_auth_data.user);
             splatnet3_auth_data = data;
             saveSplatNet3AuthData(data);
@@ -192,6 +193,8 @@ const getHandler = async (message: Message) => {
             return handler;
         }
     }
+
+    return null;
 }
 
 const handleQuery = async (handler: (_: Message) => void, message: Message) => {
@@ -204,8 +207,7 @@ const handleCoopResultQuery = async (message: Message) => {
     const detailResp = await splatnet3.getCoopHistoryDetail(
         resp.data.coopResult.historyGroupsOnlyFirst.nodes[0].historyDetails.nodes[0].id);
     const reply = buildCoopSummary(
-        detailResp.data.coopHistoryDetail,
-        process.env.SHOW_PLAYER_NAME?.toLowerCase() == "true");
+        detailResp.data.coopHistoryDetail);
     saveCoopDetails(detailResp.data.coopHistoryDetail);
     message.say(reply);
     log("Coop result query done");
